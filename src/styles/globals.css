@@ -49,7 +49,7 @@
 
 body {
   margin: 0;
-  background: var(--background);
+  background: #0b0d10;
   color: var(--foreground);
   font-family: "Inter", system-ui, -apple-system, sans-serif;
   font-size: var(--font-size);
