@@ -164,10 +164,15 @@ export default function App() {
           return { ...offer, timeRemaining: newTimeRemaining };
         }).filter(Boolean) as Offer[];
         
-        // Add new offers occasionally (slightly faster and allow a few more)
-        if (Math.random() > 0.94 && updated.length < 10) {
-          const newOffer = generateNewOffer();
-          if (newOffer) updated.push(newOffer);
+        // Add new offers with rate based on inventory:
+        // <=3 offers: ~1 every 3s (spawnChance ≈ 0.33 per tick)
+        // otherwise (while <10): ~1 every 8s (spawnChance ≈ 0.125 per tick)
+        if (updated.length < 10) {
+          const spawnChance = updated.length <= 3 ? 1 / 3 : 1 / 8;
+          if (Math.random() < spawnChance) {
+            const newOffer = generateNewOffer();
+            if (newOffer) updated.push(newOffer);
+          }
         }
         
         return updated;
