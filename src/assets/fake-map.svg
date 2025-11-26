@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1600" width="900" height="1600">
+  <defs>
+    <linearGradient id="river" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#9ed8ff" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#6fc4ff" stop-opacity="0.8" />
+    </linearGradient>
+  </defs>
+  <rect width="900" height="1600" fill="#f4f6fb"/>
+  <!-- Parks -->
+  <g fill="#b8e7c7" opacity="0.7">
+    <path d="M120 180 Q200 140 260 200 Q220 280 140 260 Z"/>
+    <path d="M700 240 Q780 210 820 260 Q780 320 720 300 Z"/>
+    <path d="M180 720 Q260 700 300 760 Q260 820 200 790 Z"/>
+    <path d="M640 1020 Q700 980 780 1040 Q720 1120 660 1080 Z"/>
+    <path d="M260 1260 Q330 1220 380 1280 Q320 1340 270 1310 Z"/>
+    <circle cx="520" cy="520" r="80"/>
+  </g>
+  <!-- Waterway -->
+  <path d="M -50 300 C 200 240 260 260 420 340 S 640 420 760 380 S 980 340 980 520 S 780 620 660 680 S 520 820 420 800 S 200 760 120 820 S -40 940 -60 1100 S 160 1200 320 1220 S 520 1300 680 1260 S 940 1180 960 1360" fill="none" stroke="url(#river)" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+  <!-- Secondary roads -->
+  <g stroke="#d7dbe3" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M60 150 L 840 210"/>
+    <path d="M80 440 L 860 520"/>
+    <path d="M60 700 L 820 760"/>
+    <path d="M120 980 L 880 1040"/>
+    <path d="M80 1260 L 860 1340"/>
+    <path d="M200 40 L 260 1540"/>
+    <path d="M420 20 L 480 1540"/>
+    <path d="M620 0 L 680 1540"/>
+  </g>
+  <!-- Primary roads -->
+  <g stroke="#c6cad6" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M -40 560 C 200 520 360 500 520 560 S 780 660 980 620"/>
+    <path d="M 40 880 C 260 860 420 840 560 900 S 800 980 960 940"/>
+    <path d="M 140 200 L 200 620 L 240 1040 L 200 1480"/>
+    <path d="M 520 240 L 560 680 L 600 1100 L 560 1460"/>
+  </g>
+  <!-- Minor roads grid -->
+  <g stroke="#e3e6ef" stroke-width="10" stroke-linecap="round">
+    <path d="M 0 60 L 900 120"/>
+    <path d="M 0 320 L 900 380"/>
+    <path d="M 0 580 L 900 640"/>
+    <path d="M 0 840 L 900 900"/>
+    <path d="M 0 1100 L 900 1160"/>
+    <path d="M 0 1360 L 900 1420"/>
+    <path d="M 320 0 L 360 1600"/>
+    <path d="M 760 0 L 800 1600"/>
+    <path d="M 40 0 L 100 1600"/>
+  </g>
+  <!-- Route highlight -->
+  <path d="M 180 640 Q 260 600 360 640 Q 520 700 640 660 Q 780 620 820 660" fill="none" stroke="#4db3a1" stroke-width="14" stroke-linecap="round" stroke-dasharray="24 12" opacity="0.9"/>
+  <!-- Markers -->
+  <g fill="#4db3a1" opacity="0.9">
+    <circle cx="360" cy="640" r="12"/>
+    <circle cx="760" cy="660" r="12"/>
+  </g>
+</svg>
