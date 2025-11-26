@@ -136,8 +136,8 @@ export default function App() {
   const [filters, setFilters] = useState<FilterState>({
     platforms: {
       Uber: true,
-      Lyft: false,
-      DoorDash: false,
+      Lyft: true,
+      DoorDash: true,
       SkipTheDishes: true
     },
     offerTypes: {
