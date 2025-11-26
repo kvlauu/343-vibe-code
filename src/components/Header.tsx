@@ -10,7 +10,7 @@ interface HeaderProps {
 
 export function Header({ onFilterClick, onSortClick, onRefresh, lastUpdate, offersCount }: HeaderProps) {
   return (
-    <div className="bg-[#4db3a1] px-4 py-3 sticky top-0 z-10">
+    <div className="bg-[#4db3a1] px-4 py-3 sticky top-0 z-20">
       {/* Top Row - Time */}
       <div className="flex justify-center mb-4">
         <span className="text-white text-[17px]">{new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}</span>

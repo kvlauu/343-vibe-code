@@ -31,7 +31,7 @@ export function OfferCard({ offer, onAccept, onDecline }: OfferCardProps) {
       {/* Close Button */}
       <button
         onClick={() => onDecline(offer.id)}
-        className="absolute right-3 top-3 z-10 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-gray-100 transition-colors"
+        className="absolute right-3 top-3 z-[1] w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-gray-100 transition-colors"
       >
         <X className="w-5 h-5 text-black" />
       </button>
