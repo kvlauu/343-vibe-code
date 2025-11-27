@@ -514,7 +514,7 @@ export default function NavigationMap() {
         <p className="leading-[normal]">0.8 mi</p>
       </div>
       <div className="absolute flex flex-col font-['SF_Pro:Medium',sans-serif] font-[510] justify-center leading-[0] left-[144px] text-[#99a1af] text-[14px] text-nowrap top-[767.5px] tracking-[-0.42px] translate-y-[-50%]" style={{ fontVariationSettings: "'wdth' 100" }}>
-        <p className="leading-[normal] whitespace-pre">Picking up Sofiia</p>
+        <p className="leading-[normal] whitespace-pre">Picking up Schneider</p>
       </div>
     </div>
   );

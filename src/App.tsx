@@ -1,16 +1,22 @@
-import { useState, useEffect, useMemo } from 'react';
-import { OfferCard } from './components/OfferCard';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { 
+  TrendingUp, 
+  Wallet, 
+  Clock, 
+  MapPin, 
+  ChevronRight, 
+  Bell,
+  User
+} from 'lucide-react';
 import { FilterPanel } from './components/FilterPanel';
 import { SortPanel } from './components/SortPanel';
 import { ConfirmationModal } from './components/ConfirmationModal';
 import { BottomNav } from './components/BottomNav';
-import { Header } from './components/Header';
-import { LoadingScreen } from './components/LoadingScreen';
-import { NoOffersScreen } from './components/NoOffersScreen';
 import { TripScreen } from './components/TripScreen';
 import { StatsScreen } from './components/StatsScreen';
 import { MoreScreen } from './components/MoreScreen';
 import { MapScreen } from './components/MapScreen';
+import { LiveOfferFeed } from './components/LiveOfferFeed';
 import type { Offer, FilterState, SortOption } from './types';
 
 // Mock data for offers (seed with more volume)
@@ -152,6 +158,9 @@ export default function App() {
     distanceMax: 50
   });
 
+  // Keep track of offer IDs to detect new additions
+  const prevOfferIds = useRef<Set<string>>(new Set(offers.map(o => o.id)));
+
   // Update countdown timers every second
   useEffect(() => {
     const timer = setInterval(() => {
@@ -164,9 +173,7 @@ export default function App() {
           return { ...offer, timeRemaining: newTimeRemaining };
         }).filter(Boolean) as Offer[];
         
-        // Add new offers with rate based on inventory:
-        // <=3 offers: ~1 every 3s (spawnChance ≈ 0.33 per tick)
-        // otherwise (while <10): ~1 every 8s (spawnChance ≈ 0.125 per tick)
+        // Add new offers with rate based on inventory
         if (updated.length < 10) {
           const spawnChance = updated.length <= 3 ? 1 / 3 : 1 / 8;
           if (Math.random() < spawnChance) {
@@ -177,19 +184,28 @@ export default function App() {
         
         return updated;
       });
-      setLastUpdate(new Date());
+      // Forces re-render every second, used by getTimeSinceUpdate
     }, 1000);
 
     return () => clearInterval(timer);
   }, []);
 
+  // Detect new offers and reset the lastUpdated timer
+  useEffect(() => {
+    const currentIds = new Set(offers.map(o => o.id));
+    const hasNewOffer = offers.some(o => !prevOfferIds.current.has(o.id));
+    
+    if (hasNewOffer) {
+      setLastUpdate(new Date());
+    }
+    
+    prevOfferIds.current = currentIds;
+  }, [offers]);
+
   // Apply filters and sort whenever they change
   useEffect(() => {
-    // Only show loading on initial mount (skip it)
     if (isInitialLoad) {
       setIsInitialLoad(false);
-      
-      // Just apply filters without loading screen on first load
       let filtered = offers.filter(offer => {
         if (!filters.platforms[offer.platform]) return false;
         const offerType = offer.type === 'rideshare' ? 'ride' : 'delivery';
@@ -204,27 +220,19 @@ export default function App() {
     }
 
     let filtered = offers.filter(offer => {
-      // Platform filter
       if (!filters.platforms[offer.platform]) return false;
-      
-      // Offer type filter
       const offerType = offer.type === 'rideshare' ? 'ride' : 'delivery';
       if (!filters.offerTypes[offerType]) return false;
-      
-      // Distance filter
       if (offer.distance > filters.distanceFromTrip) return false;
-      
       return true;
     });
     
-    // Apply sorting
     const sorted = sortOffers(filtered, sortOption);
     setFilteredOffers(sorted);
   }, [offers, filters, sortOption, isInitialLoad]);
 
   const sortOffers = (offers: Offer[], sort: SortOption): Offer[] => {
     const sorted = [...offers];
-    
     switch (sort) {
       case 'highestPay':
         return sorted.sort((a, b) => b.payout - a.payout);
@@ -287,16 +295,13 @@ export default function App() {
     if (selectedOffer) {
       setOffers((prev) => prev.filter((o) => o.id !== selectedOffer.id));
       setShowConfirmation(false);
-      
-      // Start the trip
       setActiveTrip({
-        riderName: 'Sofiia',
+        riderName: 'Schneider',
         pickupAddress: selectedOffer.pickup,
         dropoffAddress: selectedOffer.dropoff,
         estimatedTime: selectedOffer.estimatedTime,
         distance: selectedOffer.distance
       });
-      
       setActiveTab('map');
       setSelectedOffer(null);
     }
@@ -324,16 +329,8 @@ export default function App() {
 
   const handleResetFilters = () => {
     setFilters({
-      platforms: {
-        Uber: true,
-        Lyft: true,
-        DoorDash: true,
-        SkipTheDishes: true
-      },
-      offerTypes: {
-        ride: true,
-        delivery: true
-      },
+      platforms: { Uber: true, Lyft: true, DoorDash: true, SkipTheDishes: true },
+      offerTypes: { ride: true, delivery: true },
       radiusFromLocation: 25,
       distanceFromTrip: 30,
       radiusMin: 5,
@@ -354,188 +351,140 @@ export default function App() {
   const handleRetry = () => {
     setIsLoading(true);
     setTimeout(() => {
-      // Generate new offers
-      const newOffers = generateOffers();
-      setOffers(newOffers);
+      setOffers(generateOffers());
       setIsLoading(false);
     }, 2000);
   };
 
-  const handleAdjustFilters = () => {
-    setShowFilters(true);
-  };
-
   const getTimeSinceUpdate = () => {
     const seconds = Math.floor((new Date().getTime() - lastUpdate.getTime()) / 1000);
-    if (seconds < 5) return 'just now';
-    if (seconds < 60) return `${seconds}s ago`;
-    const minutes = Math.floor(seconds / 60);
-    return `${minutes}m ago`;
+    
+    // Snap to nearest 3 seconds (0, 3, 6, 9...)
+    const snappedSeconds = Math.floor(seconds / 3) * 3;
+
+    if (snappedSeconds < 3) return 'just now';
+    return `${snappedSeconds}s ago`;
   };
-
-  const offerMetrics = useMemo(() => {
-    if (filteredOffers.length === 0) {
-      return {
-        total: 0,
-        avgPayout: 0,
-        avgDistance: 0,
-        rides: 0,
-        deliveries: 0,
-        soonestExpiry: null as number | null,
-        topPayout: null as Offer | null,
-      };
-    }
-
-    const total = filteredOffers.length;
-    const payoutTotal = filteredOffers.reduce((sum, offer) => sum + offer.payout, 0);
-    const distanceTotal = filteredOffers.reduce((sum, offer) => sum + offer.distance, 0);
-    const rides = filteredOffers.filter((offer) => offer.type === 'rideshare').length;
-    const deliveries = total - rides;
-    const soonestExpiry = Math.min(...filteredOffers.map((offer) => offer.timeRemaining));
-    const topPayout = filteredOffers.reduce(
-      (highest, current) => (current.payout > highest.payout ? current : highest),
-      filteredOffers[0]
-    );
-
-    return {
-      total,
-      avgPayout: payoutTotal / total,
-      avgDistance: distanceTotal / total,
-      rides,
-      deliveries,
-      soonestExpiry,
-      topPayout,
-    };
-  }, [filteredOffers]);
 
   const renderOffersList = () => (
-    <div className="flex-1 overflow-y-auto pb-24 px-4 pt-4">
-      {filteredOffers.length === 0 ? (
-        <NoOffersScreen 
-          type={offers.length === 0 ? 'empty' : 'filtered'}
-          onRetry={handleRetry}
-          onAdjustFilters={handleAdjustFilters}
-        />
-      ) : (
-        <div className="space-y-4">
-          {filteredOffers.map((offer) => (
-            <OfferCard
-              key={offer.id}
-              offer={offer}
-              onAccept={handleAccept}
-              onDecline={handleDecline}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+    <LiveOfferFeed
+      offers={filteredOffers}
+      filters={filters}
+      onFiltersChange={setFilters}
+      onAccept={handleAccept}
+      onDecline={handleDecline}
+      onRefresh={handleRetry}
+      onSort={() => setShowSort(true)}
+      onFilter={() => setShowFilters(true)}
+      lastUpdated={getTimeSinceUpdate()}
+      isLoading={isLoading}
+    />
   );
 
-  const renderHomeView = () => {
-    const heroOffer = offerMetrics.topPayout;
-    const remainingOffers = heroOffer
-      ? filteredOffers.filter((offer) => offer.id !== heroOffer.id)
-      : filteredOffers;
-
-    return (
-      <div className="flex-1 overflow-y-auto pb-24 px-4 pt-4 space-y-4">
-        {heroOffer ? (
-          <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm space-y-3">
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-1">
-                <p className="text-sm text-gray-500">Top payout right now</p>
-                <p className="text-3xl font-semibold">${heroOffer.payout.toFixed(2)}</p>
-                <p className="text-sm text-gray-600">
-                  {heroOffer.platform} · {heroOffer.type}
-                </p>
-              </div>
-              <button
-                onClick={() => handleAccept(heroOffer)}
-                className="rounded-full bg-[#4db3a1] px-4 py-2 text-sm font-semibold text-white hover:bg-[#45a08f] transition-colors"
-              >
-                Accept
-              </button>
-            </div>
-            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
-              <span>{heroOffer.estimatedTime} min</span>
-              <span className="text-gray-300">•</span>
-              <span>{heroOffer.distance.toFixed(1)} km</span>
-              <span className="text-gray-300">•</span>
-              <span>Expires in {heroOffer.timeRemaining}s</span>
-            </div>
-            <div className="space-y-1 text-sm text-gray-700">
-              <p>{heroOffer.pickup}</p>
-              <p className="text-gray-500">{heroOffer.dropoff}</p>
-            </div>
+  const renderHomeView = () => (
+    <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
+      <div className="bg-white px-6 pt-12 pb-6 border-b border-gray-100 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+        <div>
+          <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Hustle</h1>
+          <p className="text-sm text-gray-500 font-medium mt-1">Good morning, Oliver</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <button className="relative p-2 rounded-full bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors">
+            <Bell className="h-6 w-6" />
+            <span className="absolute top-2 right-2 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+          </button>
+          <div className="h-10 w-10 rounded-full bg-[#4db3a1]/10 flex items-center justify-center border-2 border-white shadow-sm">
+             <User className="h-5 w-5 text-[#4db3a1]" />
           </div>
-        ) : (
-          <NoOffersScreen 
-            type={offers.length === 0 ? 'empty' : 'filtered'}
-            onRetry={handleRetry}
-            onAdjustFilters={handleAdjustFilters}
-          />
-        )}
-
-        {remainingOffers.length > 0 && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">More offers</h3>
-              <button
-                onClick={() => setActiveTab('offers')}
-                className="text-sm font-semibold text-[#4db3a1] hover:text-[#3a8b7d]"
-              >
-                View all
-              </button>
-            </div>
-            <div className="space-y-3">
-              {remainingOffers.slice(0, 3).map((offer) => (
-                <OfferCard
-                  key={offer.id}
-                  offer={offer}
-                  onAccept={handleAccept}
-                  onDecline={handleDecline}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+        </div>
       </div>
-    );
-  };
+
+      <div className="p-5 space-y-6">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm flex flex-col items-center justify-center text-center">
+            <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 mb-3">
+              <Clock className="h-5 w-5" />
+            </div>
+            <p className="text-xs font-bold uppercase text-gray-400 tracking-wider mb-1">Time Online</p>
+            <p className="text-xl font-bold text-gray-900">4h 12m</p>
+          </div>
+          <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm flex flex-col items-center justify-center text-center">
+            <div className="h-10 w-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-600 mb-3">
+              <MapPin className="h-5 w-5" />
+            </div>
+            <p className="text-xs font-bold uppercase text-gray-400 tracking-wider mb-1">Trips Done</p>
+            <p className="text-xl font-bold text-gray-900">8</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+          <div className="flex justify-between items-center mb-3">
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-full bg-[#4db3a1]/10 flex items-center justify-center text-[#4db3a1]">
+                <TrendingUp className="h-4 w-4" />
+              </div>
+              <h3 className="font-bold text-gray-900">Weekly Goal</h3>
+            </div>
+            <span className="text-sm font-bold text-[#4db3a1] bg-[#4db3a1]/10 px-2 py-1 rounded-md">85%</span>
+          </div>
+          <div className="w-full bg-gray-100 rounded-full h-3 mb-3 overflow-hidden">
+            <div className="bg-[#FEAB00] h-3 rounded-full transition-all duration-1000" style={{ width: '85%' }}></div>
+          </div>
+          <div className="flex justify-between items-center text-sm">
+             <span className="font-semibold text-gray-900">$850 <span className="text-gray-400 font-normal">earned</span></span>
+             <span className="text-gray-500">$1000 target</span>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-lg font-bold text-gray-900 mb-4 px-1">For You</h3>
+          <div className="space-y-3">
+            <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center gap-4 hover:bg-gray-50 transition-colors cursor-pointer">
+              <div className="h-12 w-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
+                <TrendingUp className="h-6 w-6" />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-bold text-gray-900 text-sm">High Demand Area</h4>
+                <p className="text-xs text-gray-500 mt-0.5">Surge pricing active in Downtown (+1.5x).</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-gray-300" />
+            </div>
+            
+            <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center gap-4 hover:bg-gray-50 transition-colors cursor-pointer">
+              <div className="h-12 w-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
+                <Wallet className="h-6 w-6" />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-bold text-gray-900 text-sm">Payment Sent</h4>
+                <p className="text-xs text-gray-500 mt-0.5">$142.50 transferred to your bank.</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-gray-300" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   const renderMapTab = () => (
     <MapScreen activeTab={activeTab} onTabChange={setActiveTab} showNav={false} />
   );
 
   const renderStatsTab = () => (
-    <StatsScreen
-      activeTab={activeTab}
-      onTabChange={setActiveTab}
-      showNav={false}
-    />
+    <StatsScreen activeTab={activeTab} onTabChange={setActiveTab} showNav={false} />
   );
 
   const renderMoreTab = () => (
-    <MoreScreen
-      activeTab={activeTab}
-      onTabChange={setActiveTab}
-      showNav={false}
-    />
+    <MoreScreen activeTab={activeTab} onTabChange={setActiveTab} showNav={false} />
   );
 
   const renderActiveTab = () => {
     switch (activeTab) {
-      case 'home':
-        return renderHomeView();
-      case 'map':
-        return renderMapTab();
-      case 'stats':
-        return renderStatsTab();
-      case 'more':
-        return renderMoreTab();
-      case 'offers':
-      default:
-        return renderOffersList();
+      case 'home': return renderHomeView();
+      case 'map': return renderMapTab();
+      case 'stats': return renderStatsTab();
+      case 'more': return renderMoreTab();
+      case 'offers': default: return renderOffersList();
     }
   };
 
@@ -549,30 +498,12 @@ export default function App() {
         />
       ) : (
         <div className="relative w-full min-h-screen bg-gray-50 flex flex-col max-w-[430px] mx-auto">
-          {/* Header (only on offers tab) */}
-          {activeTab === 'offers' && (
-            <Header 
-              onFilterClick={() => setShowFilters(true)}
-              onSortClick={() => setShowSort(true)}
-              onRefresh={handleRetry}
-              lastUpdate={getTimeSinceUpdate()}
-              offersCount={filteredOffers.length}
-            />
-          )}
-
-          {/* Main Content by tab */}
           {renderActiveTab()}
-
-          {/* Bottom Navigation */}
           <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
-
-          {/* Filter Panel */}
+          
           {showFilters && (
             <div className="fixed inset-0 z-50 flex items-end">
-              <div 
-                className="absolute inset-0 bg-black/50"
-                onClick={() => setShowFilters(false)}
-              />
+              <div className="absolute inset-0 bg-black/50" onClick={() => setShowFilters(false)} />
               <div className="relative w-full max-w-[430px] mx-auto animate-slide-up">
                 <FilterPanel
                   filters={filters}
@@ -584,13 +515,9 @@ export default function App() {
             </div>
           )}
 
-          {/* Sort Panel */}
           {showSort && (
             <div className="fixed inset-0 z-50 flex items-end">
-              <div 
-                className="absolute inset-0 bg-black/50"
-                onClick={() => setShowSort(false)}
-              />
+              <div className="absolute inset-0 bg-black/50" onClick={() => setShowSort(false)} />
               <div className="relative w-full max-w-[430px] mx-auto animate-slide-up">
                 <SortPanel
                   currentSort={sortOption}
@@ -602,13 +529,9 @@ export default function App() {
             </div>
           )}
 
-          {/* Confirmation Modal */}
           {showConfirmation && selectedOffer && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <div 
-                className="absolute inset-0 bg-black/60"
-                onClick={handleCancelConfirmation}
-              />
+              <div className="absolute inset-0 bg-black/60" onClick={handleCancelConfirmation} />
               <div className="relative w-full max-w-[360px] animate-scale-in">
                 <ConfirmationModal
                   offer={selectedOffer}
@@ -617,11 +540,6 @@ export default function App() {
                 />
               </div>
             </div>
-          )}
-
-          {/* Loading Screen */}
-          {isLoading && (
-            <LoadingScreen />
           )}
         </div>
       )}

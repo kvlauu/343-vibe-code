@@ -1,5 +1,6 @@
 import { BottomNav } from "./BottomNav";
 import { MapView } from "./MapView";
+import { MapPin } from "lucide-react";
 
 interface MapScreenProps {
   activeTab: string;
@@ -14,17 +15,22 @@ export function MapScreen({ activeTab, onTabChange, showNav = false }: MapScreen
       <div className="flex-1 relative">
         <MapView className="absolute inset-0" />
 
+        {/* Pinpoint centered */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pb-10">
+            <MapPin className="h-10 w-10 text-[#4db3a1] fill-current" />
+        </div>
+
         {/* Center message */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-          <div className="bg-white rounded-2xl shadow-lg p-8">
-            <p className="text-gray-600 text-[16px] mb-2">No active trips</p>
-            <p className="text-gray-400 text-[14px]">Accept an offer to start navigation</p>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 mt-8 text-center w-full px-8">
+          <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+            <p className="text-gray-900 font-semibold text-lg mb-1">No active trip</p>
+            <p className="text-gray-500 text-sm">Head to the Offers tab to find your next hustle.</p>
           </div>
         </div>
       </div>
 
       {/* Bottom Navigation */}
-      {showNav && <BottomNav activeTab={activeTab} onTabChange={onTabChange} />}
+      <BottomNav activeTab={activeTab} onTabChange={onTabChange} />
     </div>
   );
 }

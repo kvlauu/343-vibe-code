@@ -1,4 +1,5 @@
 import { RefreshCw, ArrowUpDown, SlidersHorizontal } from 'lucide-react';
+import loadingImg from "@/assets/loading.png";
 
 export function LoadingScreen() {
   return (
@@ -39,88 +40,8 @@ export function LoadingScreen() {
       </div>
 
       {/* Loading Content */}
-      <div className="flex-1 flex flex-col items-center justify-center">
-        {/* Static Car */}
-        <div className="relative w-[215px] h-[215px] mb-8">
-          <svg viewBox="0 0 300 150" className="w-full h-full">
-            {/* Car Body */}
-            <g className="car-body">
-              {/* Main body */}
-              <path
-                d="M 50 100 L 50 80 L 80 60 L 120 60 L 150 80 L 250 80 L 250 100 L 240 100 L 240 110 L 220 120 L 80 120 L 60 110 L 60 100 Z"
-                fill="none"
-                stroke="black"
-                strokeWidth="4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              
-              {/* Windows */}
-              <path
-                d="M 85 75 L 85 65 L 115 65 L 115 75 Z"
-                fill="none"
-                stroke="black"
-                strokeWidth="4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M 125 75 L 125 65 L 155 75 Z"
-                fill="none"
-                stroke="black"
-                strokeWidth="4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              
-              {/* Front Wheel */}
-              <circle
-                cx="90"
-                cy="120"
-                r="18"
-                fill="none"
-                stroke="black"
-                strokeWidth="4"
-              />
-              <circle
-                cx="90"
-                cy="120"
-                r="8"
-                fill="none"
-                stroke="black"
-                strokeWidth="4"
-              />
-              
-              {/* Back Wheel */}
-              <circle
-                cx="210"
-                cy="120"
-                r="18"
-                fill="none"
-                stroke="black"
-                strokeWidth="4"
-              />
-              <circle
-                cx="210"
-                cy="120"
-                r="8"
-                fill="none"
-                stroke="black"
-                strokeWidth="4"
-              />
-            </g>
-          </svg>
-        </div>
-
-        {/* Loading Text with Animated Dots */}
-        <div className="flex items-center">
-          <p className="text-black text-[24px] tracking-[0.1px]">Loading</p>
-          <div className="flex ml-1">
-            <span className="text-black text-[24px] tracking-[0.1px] animate-dot-1">.</span>
-            <span className="text-black text-[24px] tracking-[0.1px] animate-dot-2">.</span>
-            <span className="text-black text-[24px] tracking-[0.1px] animate-dot-3">.</span>
-          </div>
-        </div>
+      <div className="flex-1 flex items-center justify-center">
+        <img src={loadingImg} alt="Loading offers" className="w-64 h-auto" />
       </div>
 
       {/* Bottom Navigation */}
