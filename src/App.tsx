@@ -34,30 +34,6 @@ const generateOffers = (): Offer[] => [
   },
   {
     id: '2',
-    platform: 'DoorDash',
-    type: 'delivery',
-    payout: 18.75,
-    timeRemaining: 38,
-    estimatedTime: 12,
-    distance: 7.2,
-    pickup: '350 King St W, Toronto',
-    dropoff: '100 Queen St E, Toronto',
-    location: { lat: 43.66, lng: -79.39 },
-  },
-  {
-    id: '3',
-    platform: 'SkipTheDishes',
-    type: 'delivery',
-    payout: 22.0,
-    timeRemaining: 52,
-    estimatedTime: 18,
-    distance: 11.3,
-    pickup: '500 Bloor St W, Toronto',
-    dropoff: '75 Spadina Ave, Toronto',
-    location: { lat: 43.64, lng: -79.37 },
-  },
-  {
-    id: '4',
     platform: 'Lyft',
     type: 'rideshare',
     payout: 31.25,
@@ -69,7 +45,7 @@ const generateOffers = (): Offer[] => [
     location: { lat: 43.67, lng: -79.4 },
   },
   {
-    id: '5',
+    id: '3',
     platform: 'Uber',
     type: 'rideshare',
     payout: 27.4,
@@ -80,41 +56,17 @@ const generateOffers = (): Offer[] => [
     dropoff: '150 College St, Toronto',
     location: { lat: 43.64, lng: -79.38 },
   },
-  {
-    id: '6',
+   {
+    id: '4',
     platform: 'Lyft',
     type: 'rideshare',
-    payout: 19.9,
-    timeRemaining: 47,
+    payout: 21.2,
+    timeRemaining: 30,
     estimatedTime: 13,
-    distance: 8.4,
-    pickup: '99 Harbour Sq, Toronto',
-    dropoff: '401 Richmond St W, Toronto',
-    location: { lat: 43.64, lng: -79.39 },
-  },
-  {
-    id: '7',
-    platform: 'DoorDash',
-    type: 'delivery',
-    payout: 16.3,
-    timeRemaining: 44,
-    estimatedTime: 11,
-    distance: 6.8,
-    pickup: '123 Spadina Ave, Toronto',
-    dropoff: '77 Bloor St W, Toronto',
-    location: { lat: 43.65, lng: -79.4 },
-  },
-  {
-    id: '8',
-    platform: 'SkipTheDishes',
-    type: 'delivery',
-    payout: 20.1,
-    timeRemaining: 36,
-    estimatedTime: 14,
-    distance: 9.9,
-    pickup: '10 Bay St, Toronto',
-    dropoff: '250 Front St W, Toronto',
-    location: { lat: 43.64, lng: -79.38 },
+    distance: 10.6,
+    pickup: '25 College St, Toronto',
+    dropoff: '150 Queen St, Toronto',
+    location: { lat: 43.67, lng: -79.42 },
   },
 ];
 
@@ -253,7 +205,7 @@ export default function App() {
   };
 
   const generateNewOffer = (): Offer | null => {
-    const platforms = ['Uber', 'Lyft', 'DoorDash', 'SkipTheDishes'] as const;
+    const platforms = ['Uber', 'Lyft'] as const;
     const platform = platforms[Math.floor(Math.random() * platforms.length)];
     const type: Offer['type'] =
       platform === 'Uber' || platform === 'Lyft' ? 'rideshare' : 'delivery';
