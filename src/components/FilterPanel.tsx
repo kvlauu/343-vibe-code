@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { FilterState } from '../types';
-import { X, SlidersHorizontal } from 'lucide-react';
+import { X, SlidersHorizontal, Info } from 'lucide-react';
 
 interface FilterPanelProps {
   filters: FilterState;
@@ -101,25 +101,35 @@ export function FilterPanel({ filters, onApply, onReset, onClose }: FilterPanelP
                 </div>
               )}
             </button>
+            
+            {/* DoorDash - Disabled */}
             <button
-              onClick={() => togglePlatform('DoorDash')}
-              className={`h-[34px] rounded-[9px] text-[16px] transition-colors ${
-                localFilters.platforms.DoorDash
-                  ? 'bg-[#4db3a1] text-white border-[1.5px] border-[#4db3a1]'
-                  : 'bg-gray-100 text-black'
-              }`}
+              disabled
+              className="group relative h-[34px] rounded-[9px] text-[16px] transition-colors bg-gray-100 text-gray-400 cursor-not-allowed border border-transparent flex items-center justify-center gap-2"
             >
               DoorDash
+              <Info className="w-4 h-4" />
+              {/* Tooltip */}
+              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-max bg-gray-800 text-white text-[12px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                Account not connected
+                {/* Tooltip Arrow */}
+                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+              </div>
             </button>
+
+            {/* SkipTheDishes - Disabled */}
             <button
-              onClick={() => togglePlatform('SkipTheDishes')}
-              className={`h-[34px] rounded-[9px] text-[16px] transition-colors ${
-                localFilters.platforms.SkipTheDishes
-                  ? 'bg-[#4db3a1] text-white border-[1.5px] border-[#4db3a1]'
-                  : 'bg-gray-100 text-black'
-              }`}
+              disabled
+              className="group relative h-[34px] rounded-[9px] text-[16px] transition-colors bg-gray-100 text-gray-400 cursor-not-allowed border border-transparent flex items-center justify-center gap-2"
             >
               SkipTheDishes
+              <Info className="w-4 h-4" />
+              {/* Tooltip */}
+              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-max bg-gray-800 text-white text-[12px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                Account not connected
+                {/* Tooltip Arrow */}
+                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+              </div>
             </button>
           </div>
         </div>

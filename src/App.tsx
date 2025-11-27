@@ -1,16 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
-import { 
-  TrendingUp, 
-  Wallet, 
-  Clock, 
-  MapPin, 
-  ChevronRight, 
+import {
+  TrendingUp,
+  Wallet,
+  Clock,
+  MapPin,
+  ChevronRight,
   Bell,
-  User
+  User,
 } from 'lucide-react';
 import { FilterPanel } from './components/FilterPanel';
 import { SortPanel } from './components/SortPanel';
-import { ConfirmationModal } from './components/ConfirmationModal';
 import { BottomNav } from './components/BottomNav';
 import { TripScreen } from './components/TripScreen';
 import { StatsScreen } from './components/StatsScreen';
@@ -124,8 +123,6 @@ export default function App() {
   const [filteredOffers, setFilteredOffers] = useState<Offer[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [showSort, setShowSort] = useState(false);
-  const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
-  const [showConfirmation, setShowConfirmation] = useState(false);
   const [activeTab, setActiveTab] = useState('offers');
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [sortOption, setSortOption] = useState<SortOption>('default');
@@ -165,13 +162,15 @@ export default function App() {
   useEffect(() => {
     const timer = setInterval(() => {
       setOffers(prevOffers => {
-        const updated = prevOffers.map(offer => {
-          const newTimeRemaining = offer.timeRemaining - 1;
-          if (newTimeRemaining <= 0) {
-            return null; // Remove expired offers
-          }
-          return { ...offer, timeRemaining: newTimeRemaining };
-        }).filter(Boolean) as Offer[];
+        const updated = prevOffers
+          .map(offer => {
+            const newTimeRemaining = offer.timeRemaining - 1;
+            if (newTimeRemaining <= 0) {
+              return null; // Remove expired offers
+            }
+            return { ...offer, timeRemaining: newTimeRemaining };
+          })
+          .filter(Boolean) as Offer[];
         
         // Add new offers with rate based on inventory
         if (updated.length < 10) {
@@ -184,7 +183,6 @@ export default function App() {
         
         return updated;
       });
-      // Forces re-render every second, used by getTimeSinceUpdate
     }, 1000);
 
     return () => clearInterval(timer);
@@ -278,33 +276,28 @@ export default function App() {
       distance: 5 + Math.random() * 15,
       pickup: location.pickup,
       dropoff: location.dropoff,
-      location: { lat: 43.65 + (Math.random() - 0.5) * 0.1, lng: -79.38 + (Math.random() - 0.5) * 0.1 }
+      location: {
+        lat: 43.65 + (Math.random() - 0.5) * 0.1,
+        lng: -79.38 + (Math.random() - 0.5) * 0.1,
+      },
     };
   };
 
+  // FINAL ACCEPT: called by LiveOfferFeed's modal (and swipe if you wire it that way)
   const handleAccept = (offer: Offer) => {
-    setSelectedOffer(offer);
-    setShowConfirmation(true);
+    setOffers(prev => prev.filter(o => o.id !== offer.id));
+    setActiveTrip({
+      riderName: 'Schneider',
+      pickupAddress: offer.pickup,
+      dropoffAddress: offer.dropoff,
+      estimatedTime: offer.estimatedTime,
+      distance: offer.distance,
+    });
+    setActiveTab('map');
   };
 
   const handleDecline = (offerId: string) => {
     setOffers((prev) => prev.filter((o) => o.id !== offerId));
-  };
-
-  const handleConfirmAccept = () => {
-    if (selectedOffer) {
-      setOffers((prev) => prev.filter((o) => o.id !== selectedOffer.id));
-      setShowConfirmation(false);
-      setActiveTrip({
-        riderName: 'Schneider',
-        pickupAddress: selectedOffer.pickup,
-        dropoffAddress: selectedOffer.dropoff,
-        estimatedTime: selectedOffer.estimatedTime,
-        distance: selectedOffer.distance
-      });
-      setActiveTab('map');
-      setSelectedOffer(null);
-    }
   };
 
   const handleTripComplete = () => {
@@ -315,11 +308,6 @@ export default function App() {
   const handleTripCancelled = () => {
     setActiveTrip(null);
     setActiveTab('offers');
-  };
-
-  const handleCancelConfirmation = () => {
-    setShowConfirmation(false);
-    setSelectedOffer(null);
   };
 
   const handleApplyFilters = (newFilters: FilterState) => {
@@ -336,7 +324,7 @@ export default function App() {
       radiusMin: 5,
       radiusMax: 50,
       distanceMin: 5,
-      distanceMax: 50
+      distanceMax: 50,
     });
   };
 
@@ -358,8 +346,6 @@ export default function App() {
 
   const getTimeSinceUpdate = () => {
     const seconds = Math.floor((new Date().getTime() - lastUpdate.getTime()) / 1000);
-    
-    // Snap to nearest 3 seconds (0, 3, 6, 9...)
     const snappedSeconds = Math.floor(seconds / 3) * 3;
 
     if (snappedSeconds < 3) return 'just now';
@@ -394,7 +380,7 @@ export default function App() {
             <span className="absolute top-2 right-2 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-white"></span>
           </button>
           <div className="h-10 w-10 rounded-full bg-[#4db3a1]/10 flex items-center justify-center border-2 border-white shadow-sm">
-             <User className="h-5 w-5 text-[#4db3a1]" />
+            <User className="h-5 w-5 text-[#4db3a1]" />
           </div>
         </div>
       </div>
@@ -405,14 +391,18 @@ export default function App() {
             <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 mb-3">
               <Clock className="h-5 w-5" />
             </div>
-            <p className="text-xs font-bold uppercase text-gray-400 tracking-wider mb-1">Time Online</p>
+            <p className="text-xs font-bold uppercase text-gray-400 tracking-wider mb-1">
+              Time Online
+            </p>
             <p className="text-xl font-bold text-gray-900">4h 12m</p>
           </div>
           <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm flex flex-col items-center justify-center text-center">
             <div className="h-10 w-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-600 mb-3">
               <MapPin className="h-5 w-5" />
             </div>
-            <p className="text-xs font-bold uppercase text-gray-400 tracking-wider mb-1">Trips Done</p>
+            <p className="text-xs font-bold uppercase text-gray-400 tracking-wider mb-1">
+              Trips Done
+            </p>
             <p className="text-xl font-bold text-gray-900">8</p>
           </div>
         </div>
@@ -425,14 +415,21 @@ export default function App() {
               </div>
               <h3 className="font-bold text-gray-900">Weekly Goal</h3>
             </div>
-            <span className="text-sm font-bold text-[#4db3a1] bg-[#4db3a1]/10 px-2 py-1 rounded-md">85%</span>
+            <span className="text-sm font-bold text-[#4db3a1] bg-[#4db3a1]/10 px-2 py-1 rounded-md">
+              85%
+            </span>
           </div>
           <div className="w-full bg-gray-100 rounded-full h-3 mb-3 overflow-hidden">
-            <div className="bg-[#FEAB00] h-3 rounded-full transition-all duration-1000" style={{ width: '85%' }}></div>
+            <div
+              className="bg-[#FEAB00] h-3 rounded-full transition-all duration-1000"
+              style={{ width: '85%' }}
+            ></div>
           </div>
           <div className="flex justify-between items-center text-sm">
-             <span className="font-semibold text-gray-900">$850 <span className="text-gray-400 font-normal">earned</span></span>
-             <span className="text-gray-500">$1000 target</span>
+            <span className="font-semibold text-gray-900">
+              $850 <span className="text-gray-400 font-normal">earned</span>
+            </span>
+            <span className="text-gray-500">$1000 target</span>
           </div>
         </div>
 
@@ -445,18 +442,22 @@ export default function App() {
               </div>
               <div className="flex-1">
                 <h4 className="font-bold text-gray-900 text-sm">High Demand Area</h4>
-                <p className="text-xs text-gray-500 mt-0.5">Surge pricing active in Downtown (+1.5x).</p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Surge pricing active in Downtown (+1.5x).
+                </p>
               </div>
               <ChevronRight className="h-5 w-5 text-gray-300" />
             </div>
-            
+
             <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center gap-4 hover:bg-gray-50 transition-colors cursor-pointer">
               <div className="h-12 w-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
                 <Wallet className="h-6 w-6" />
               </div>
               <div className="flex-1">
                 <h4 className="font-bold text-gray-900 text-sm">Payment Sent</h4>
-                <p className="text-xs text-gray-500 mt-0.5">$142.50 transferred to your bank.</p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  $142.50 transferred to your bank.
+                </p>
               </div>
               <ChevronRight className="h-5 w-5 text-gray-300" />
             </div>
@@ -480,18 +481,24 @@ export default function App() {
 
   const renderActiveTab = () => {
     switch (activeTab) {
-      case 'home': return renderHomeView();
-      case 'map': return renderMapTab();
-      case 'stats': return renderStatsTab();
-      case 'more': return renderMoreTab();
-      case 'offers': default: return renderOffersList();
+      case 'home':
+        return renderHomeView();
+      case 'map':
+        return renderMapTab();
+      case 'stats':
+        return renderStatsTab();
+      case 'more':
+        return renderMoreTab();
+      case 'offers':
+      default:
+        return renderOffersList();
     }
   };
 
   return (
     <>
       {activeTrip ? (
-        <TripScreen 
+        <TripScreen
           trip={activeTrip}
           onTripComplete={handleTripComplete}
           onTripCancelled={handleTripCancelled}
@@ -500,10 +507,13 @@ export default function App() {
         <div className="relative w-full min-h-screen bg-gray-50 flex flex-col max-w-[430px] mx-auto">
           {renderActiveTab()}
           <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
-          
+
           {showFilters && (
             <div className="fixed inset-0 z-50 flex items-end">
-              <div className="absolute inset-0 bg-black/50" onClick={() => setShowFilters(false)} />
+              <div
+                className="absolute inset-0 bg-black/50"
+                onClick={() => setShowFilters(false)}
+              />
               <div className="relative w-full max-w-[430px] mx-auto animate-slide-up">
                 <FilterPanel
                   filters={filters}
@@ -516,27 +526,17 @@ export default function App() {
           )}
 
           {showSort && (
-            <div className="fixed inset-0 z-50 flex items-end">
-              <div className="absolute inset-0 bg-black/50" onClick={() => setShowSort(false)} />
+            <div className="fixed inset-0 z-50 flex items=end">
+              <div
+                className="absolute inset-0 bg-black/50"
+                onClick={() => setShowSort(false)}
+              />
               <div className="relative w-full max-w-[430px] mx-auto animate-slide-up">
                 <SortPanel
                   currentSort={sortOption}
                   onApply={handleApplySort}
                   onReset={handleResetSort}
                   onClose={() => setShowSort(false)}
-                />
-              </div>
-            </div>
-          )}
-
-          {showConfirmation && selectedOffer && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <div className="absolute inset-0 bg-black/60" onClick={handleCancelConfirmation} />
-              <div className="relative w-full max-w-[360px] animate-scale-in">
-                <ConfirmationModal
-                  offer={selectedOffer}
-                  onAccept={handleConfirmAccept}
-                  onCancel={handleCancelConfirmation}
                 />
               </div>
             </div>

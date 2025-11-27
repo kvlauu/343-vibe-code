@@ -8,6 +8,7 @@ interface NoOffersScreenProps {
 
 export function NoOffersScreen({ type, onRetry, onAdjustFilters }: NoOffersScreenProps) {
   return (
+    <>
     <div className="flex flex-col items-center justify-center py-12 px-4">
       <div className="bg-white border border-gray-200 rounded-[16px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)] p-8 w-full max-w-[361px]">
         {/* Bell Icon */}
@@ -19,7 +20,7 @@ export function NoOffersScreen({ type, onRetry, onAdjustFilters }: NoOffersScree
         {type === 'empty' ? (
           <>
             {/* Title */}
-            <h2 className="text-[#101828] text-[16px] text-center mb-4 tracking-[-0.3125px]">
+            <h2 className="text-[#101828] text-[16px] font-semibold text-center mb-4 tracking-[-0.3125px]">
               No offers available right now
             </h2>
 
@@ -32,7 +33,7 @@ export function NoOffersScreen({ type, onRetry, onAdjustFilters }: NoOffersScree
             <div className="flex justify-center mb-4">
               <button
                 onClick={onRetry}
-                className="bg-[#4db3a1] text-white rounded-[14px] px-6 py-3 text-[16px] tracking-[-0.3125px] hover:bg-[#45a08f] transition-colors flex items-center gap-2"
+                className="bg-[#4db3a1] text-white rounded-[14px] px-6 py-3 text-[16px] font-medium tracking-[-0.3125px] hover:bg-[#45a08f] transition-colors flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 16 16" stroke="currentColor" strokeWidth="1.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 8a6.5 6.5 0 0113 0" />
@@ -52,7 +53,7 @@ export function NoOffersScreen({ type, onRetry, onAdjustFilters }: NoOffersScree
         ) : (
           <>
             {/* Title */}
-            <h2 className="text-[#101828] text-[16px] text-center mb-4 tracking-[-0.3125px]">
+            <h2 className="text-[#101828] text-[16px] font-semibold text-center mb-4 tracking-[-0.3125px]">
               No offers match your filters
             </h2>
 
@@ -65,7 +66,7 @@ export function NoOffersScreen({ type, onRetry, onAdjustFilters }: NoOffersScree
             <div className="flex justify-center">
               <button
                 onClick={onAdjustFilters}
-                className="bg-black text-white rounded-[14px] px-6 py-3 text-[16px] tracking-[-0.3125px] hover:bg-gray-900 transition-colors flex items-center gap-2"
+                className="bg-black text-white rounded-[14px] px-6 py-3 text-[16px] font-medium tracking-[-0.3125px] hover:bg-gray-900 transition-colors flex items-center gap-2"
               >
                 <SlidersHorizontal className="w-4 h-4" />
                 Adjust Filters
@@ -75,5 +76,7 @@ export function NoOffersScreen({ type, onRetry, onAdjustFilters }: NoOffersScree
         )}
       </div>
     </div>
+        </>
+
   );
 }
