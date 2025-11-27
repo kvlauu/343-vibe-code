@@ -8,7 +8,7 @@ interface MapScreenProps {
   showNav?: boolean;
 }
 
-export function MapScreen({ activeTab, onTabChange, showNav = false }: MapScreenProps) {
+export function MapScreen({ activeTab, onTabChange }: MapScreenProps) {
   return (
     <div className="relative w-full min-h-screen bg-gray-50 flex flex-col max-w-[430px] mx-auto">
       {/* Map View */}
